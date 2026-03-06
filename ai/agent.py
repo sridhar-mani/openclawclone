@@ -21,8 +21,9 @@ def main_agent_loop(model,user_prompt, convo_his):
     {user_prompt}
     """
 
-    res = model.respond(Prompt, response_format = ModelResponse)
+    age_res = model.act(Prompt, [tool_list['list'],tool_list['read'],tool_list['append'],tool_list['write'],tool_list['subagent_call']])
 
+    res = model.respond(age_res,response_format = ModelResponse)
     
     res = res.parsed
 
@@ -31,13 +32,13 @@ def main_agent_loop(model,user_prompt, convo_his):
 
     print(res)
 
-    if len(res.tool)>0 and len(res.tool)>0:
-        tool_res = tool_list[res.tool.split('(')[0]](*res.tool_input)
 
     if res.done:
         return res
-    if tool_res:
+    if res.tool:
+        tool_res = tool_list[res.tool.split('(')[0]](*res.tool_input)
         convo_his+=f"""
     Agent:{res}
     Tool result:{tool_res}
 """
+        return convo_his
